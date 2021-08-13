@@ -10,27 +10,32 @@ PythiaML is a project scheme aiming at constructing a dynamic portfolio using Ma
 
 # 3. Sequential Models on embedded sentences for Financial Sentiment Analysis
 
-### Date: 
+## Date
 
 28 Mar 2021 (HKT/ GMT +8)
 
-### Team: YU, Ho Chi Andrew. NG, Kwok Ching Arnold. ZHANG, Ruiqi Rachel. LIN, Haoli Horry.
+## Team: 
+
+YU, Ho Chi Andrew. NG, Kwok Ching Arnold. ZHANG, Ruiqi Rachel. LIN, Haoli Horry.
 
 
-### Abstract
+## Abstract
 Financial Sentiment Analysis (FSA) aims to classify a sentence of financial text as expressing positive or negative opinions toward certain instance. It could be utilized for extracting investor and public expectation towards the market or a particular instrument via news reporting and social media. However, FSA is proved to be much more difficult than classifying general sentences such as tweets or reviews which have been successfully solved in recent years. The bottleneck of FSA is mainly attributed to the lack of reliable and high-quality labelled data and thus, transfer learning with domain adoption is nearly a must. The project starts by employing a pre-trained word embedding model to convert all input sentence to a matrix. Several sequential architectures of neural networks were then experimented to general (tweets and product reviews) data and formed base models for sentiment analysis. Next, the weightings and architectures of base models were inherited to domain (financial text) data for fine-tuning and domain adoption. Two transfer learning method “Fine Tuning the final layer” and “Transfer as initial” were experimented separately and showed the successes in FSA while also reflecting potential areas of insufficient domain adoption for further consideration and improvision.
 
-### Dataset
+## Dataset
 Four datasets were used in this project and all of them are well known benchmark datasets in the fields of FSA or general sentiment analysis. “Sentiment140” and “Amazon Reviews Polarity” are used for training the base models. Both datasets consist of a text column that were used as the input in this project and the corresponding label of either 1 or 0 representing a positive or negative sentiment respectively. Combining these two datasets, we have almost 5.6 millions of balanced data in total. In the later section, we will call this combined dataset as “general data”. 
 
 “Financial PhraseBank” and “FiQA Task 1” are then used for fine tuning the base models in the later section. As same as before, these datasets consist of a text column that was used as the input and a label representing the corresponding sentiment. However, the label of “Financial PhraseBank” is a multiclass output instead having 604 (~12.46%) negative, 2879 (~59.41%) neutral and 1363 (~28.13%) positive data. On the other hand, “FiQA Task 1” consist of 1111 labelled data and its output is a continuous score ranged as [-1,1], where -1 represents totally negative and 1 represents totally positive, quantifying the degree of that sentiment. The mean, standard deviation, 1st quartile, median and 3rd quartile are 0.1226, 0.4033, -0.2605, 0.2480 and 0.4435 respectively. In the later section, we will call this combined dataset as “domain data”.
 
 Sentiment140 (http://help.sentiment140.com/for-students)
+
 Amazon reviews polarity dataset (https://www.kaggle.com/kritanjalijain/amazon-reviews?select=train.csv)
+
 Financial PhraseBank (https://www.kaggle.com/ankurzing/sentiment-analysis-for-financial-news)
+
 FiQA Task 1 (https://sites.google.com/view/fiqa/home)
 
-### Architectures
+## Architectures
 All sentences were first passed through an embedding layer, where we use the glove-6B-300d pre-trained model, to convert each observation into a (300, Tx) matrix where Tx is the maximum number of words we limited to each sentence. 
 
 Four architectures were experimented in this project and all of them are recurrent type neural networks. Their details are listed below ranked by architectural complexity:
@@ -47,11 +52,11 @@ A dense layer with sigmoid function is added to each architecture to perform bin
 
 Glove (https://nlp.stanford.edu/projects/glove/)
 
-Transfer learning Method
+## Transfer learning Method
 The exact approach to perform transfer learning always depends on 1) The amount of labelled domain data and 2) The variety of the domain data distribution from the streamline. In general, “Fine Tuning the final layer” is more appropriate when data are not sufficient data to avoid overfitting and “Transfer as initial” vice versa. In our project, both methods were experimented with.
 
-### Methodology
-The entire workflow can be split into three parts. 1. Pre-processing, 2. Base Model Training and 3. Domain Adoption.
+## Methodology
+The entire workflow can be split into three parts. 1. Pre-processing, 2. Base Model Training & 3. Domain Adoption.
 
 1.	Pre-processing 
     1. As the general data consists of tweets and product reviews, some sentence such as advertisements and non-English sentences were defined as noise data and therefore were removed at the very beginning. 
@@ -63,18 +68,20 @@ The entire workflow can be split into three parts. 1. Pre-processing, 2. Base Mo
     7. Through EDA, some sentences were discovered to be of extremely long length, thus sentences that exceed 130 words were classified as outliers and were removed.
     8. Padding was performed to control the size of input data and input sentence length was limited to 50 words. All sentence less than 50 words will pad 0 which indicate nothing at the end of the sentences up to 50 dimensions. 
 2.	Base Model Training
+
 After processed data pre-processing, we have 5,573,908 general data in total where 50.038% are negative. 100,000 general data is randomly picked to act as testing data and 2% of remaining are used as validation data for model selection and the rest are training data.
 
 All architectures (see Architectures) were trained with Adam optimizer using default learning rate -- 0.001, 8192 batch size and binary cross entropy as loss function. Model selections were also based on validation loss and the training were early stopped if 5 consecutive unimprovement existed or reach 50 epochs. 
 
 3. Domain Adoption
+
 The base models were then further trained on domain data in 2 different transfer learning method respectively. Based on different domain dataset, different treatment was made. Compared with the base model training, we split the domain data into 0.6/0.2/0.2 for training, validation, and testing purpose 
 
 “Financial PhraseBank” has an imbalanced multiclass output (see Dataset). Thus, a class-weighted categorical cross entropy was used as loss function and the weights are defined as (number of sample in i-th class)/3. This is to force different classes to have equivalent importance toward the loss function. To match with this change, the last classification layer of experimented architectures is modified to use softmax function instead. The models were further trained with Adam optimizer using learning rate ranged from 2e−4 to 5e−3, as we would like to limit the maximum epochs up to 50 due to computational consideration, and 64 batch sizes. Again, the training was early stopped if 5 consecutive unimprovement existed or reach 50 epochs. For “Fine Tuning the final layer” method, all parameters from the base model will be untrainable except the last modified layer – the softmax classifier, while all parameters are free to move for “Transfer as initial”. 
 
 “FiQA Task 1” consists of a linear output ranged between [-1, 1] (see Dataset). Thus, mean squared error was used as loss function and the last classification layer of experimented architectures is modified to a tanh function to match with this change. The models were further trained with Adam optimizer using learning rate ranged from 2e−3 to 5e−4 to limit the maximum epochs up to 50 due to computational consideration, and 32 batch sizes. Again, the training was early stopped if 5 consecutive unimprovement existed or reach 50 epochs. For “Fine Tuning the final layer” method, all parameters from the base model will be untrainable except the last modified layer – the tanh regressor, while all parameters are free to move for “Transfer as initial”.
 
-### Result
+## Result
 The general dataset has balanced label and accuracy and binary cross entropy were chosen as evaluation metrics on the base model. The results are as follow:
  
 We achieve a 90.32% testing accuracy for using 3-layer-LSTM model on general sentiment analysis. As expected, the loss and accuracy improve accordingly with respect to the model complexity. The dropout layer still successfully controls potential overfitting problem. However, this obtained accuracy is less than our expectation because GloVe can perform as good as 99.x% in other research topics. The drop of accuracy may be attributed to inaccurate data cleaning, padding and architecture setting, etc. 
