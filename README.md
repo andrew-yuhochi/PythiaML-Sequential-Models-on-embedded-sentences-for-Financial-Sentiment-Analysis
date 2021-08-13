@@ -83,11 +83,17 @@ The base models were then further trained on domain data in 2 different transfer
 
 ## Result
 The general dataset has balanced label and accuracy and binary cross entropy were chosen as evaluation metrics on the base model. The results are as follow:
+
+<img src = "result%20images/result_base_model.png" width = "500">
  
 We achieve a 90.32% testing accuracy for using 3-layer-LSTM model on general sentiment analysis. As expected, the loss and accuracy improve accordingly with respect to the model complexity. The dropout layer still successfully controls potential overfitting problem. However, this obtained accuracy is less than our expectation because GloVe can perform as good as 99.x% in other research topics. The drop of accuracy may be attributed to inaccurate data cleaning, padding and architecture setting, etc. 
 The domain data has a different label distribution from the base general data. For “Financial PhraseBank”, the categorical cross entropy loss is the main evaluation metric with the support of total accuracy and visualized confusion matrix. Although accuracy is not a good evaluation metric because of imbalanced labels, we are not interested in evaluating which model performing the best, but whether domain adoption is well performed using different transfer learning method separately. Thus, a visualized confusion matrix is a good enough tool to make direct comparison. For “FiQA Task 1”, the mean squared error works as the unique evaluation metric. The obtained results are as follow:
+
+<img src = "result%20images/result_transferred_model.png" width = "500">
  
 The final models on “Financial PhraseBank” achieve a 0.6679 testing loss and 74.43% testing accuracy using RNN model. In general, the final models on “Financial PhraseBank” work much better if we transfer the base model as initial weighting only. This indicates that a portion of domain adoption is performed during this transfer process when compared to the performance of fine tuning the last layer only. A serious domain adoption gap between general sentence and financial domain is also discovered. In addition, the performance discrepancy between training data and testing data increases with respect to the model complexity. This indicates that the problem of insufficient data which result in overfitting is magnified by increasing model complexity. The testing confusion metric below also echoes the same conclusion. The left figure is Fine Tuning RNN while transferred as initial RNN is on the right.
+
+<img src = "result%20images/confusion_matrix_finetuning.png" width = "300"> <img src = "result%20images/confusion_matrix_asinitial.png" width = "300"> 
   
 We achieved a testing loss of 0.1311 on “FiQA Task 1” using 2-layer-LSTM. This dataset is a much smaller dataset and only consist of 1111 data. As expected, models performing “Transfer as initial” were experienced a serious overfitting problem which performed worse, with higher testing MSE than the one employing “Transfer as initial”. If we inherit the conclusion from “Financial PhraseBank” that there is a huge domain adoption problem on FSA, these models do not perform any domain adoption.
 
